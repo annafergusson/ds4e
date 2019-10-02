@@ -1,0 +1,208 @@
+---
+title: "Data science for everyone"
+output:
+  html_document:
+    theme: readable
+    progressive: true
+    df_print: paged
+    highlight: tango
+    css: css/style-all.css
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+library(magick)
+library(dplyr)
+library(magrittr)
+library(readr)
+library(glue)
+library(purrr)
+library(iNZightPlots)
+library(htmltools)
+
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+
+# header
+tags$head(tags$link(rel = "shortcut icon", href = "https://annafergusson.com/logo.png"))
+
+# data sources
+photo_data <- read_csv("www/dogsvscats1.csv")
+photo_links <- read_csv("www/dogsvscats2.csv")
+photos_mini <- list.files("images/minigs")
+photos_gs <- glue("images/minigs/{photos_mini}") %>%
+  image_read()
+
+# functions
+shade = function(n, .x = 0:255 / 255) { 
+  rgb(.x, .x, .x)
+}
+
+mypars = inzpar(bg = "#FBEB7D", 
+                col.pt="#000000", 
+                fill.pt="#000000", 
+                pch=20, 
+                box.fill="transparent", 
+                cex.dotpt = 2, 
+                bar.fill = "#666666", 
+                col.fun = shade, 
+                cex.text = 3, 
+                cex.axis = 2, 
+                cex.lab = 2,
+                cex.main = 2)
+
+
+gs_pixels <- function(photo_num, num_pixels){
+  image <- photos_gs[photo_num]
+  # take a random sample of 500 pixels
+  as.numeric(image_data(image)[1,,]) %>%
+    sample(num_pixels)
+}
+
+grayscale_plot <- function(photo_num, num_pixels = 50){
+  # take a random sample of 500 pixels
+  sampledata <- data.frame(greyscale = gs_pixels(photo_num, num_pixels))
+  
+  # create an iNZight dot plot
+  fig <- image_graph(width = 800, height = 600, res = 96)
+  sampledata %>%
+    iNZightPlot(greyscale, colby = factor(greyscale, levels=0:255), plottype="dot", data=., inzpars = mypars, hide.legend = TRUE, boxplot = TRUE, xlim=c(0,255), main="Greyscale plot")
+dev.off()
+
+# weird iNZight double layer plots!
+fig[2] %>%
+    image_annotate(paste0("mean: ", round(mean(sampledata$greyscale), 1)), size = 20, color = "black", boxcolor = "grey", location = "+5+5") %>%
+    image_annotate(paste0("sd: ", round(sd(sampledata$greyscale), 1)), size = 20, color = "black", boxcolor = "grey", location = "+5+45") 
+}
+
+image_grid <- function(images, total_width = 800){
+  num <- length(images)
+  cols <- ceiling(sqrt(num))
+  pixel <- total_width
+  width <- pixel / cols 
+  backing <- image_blank(width = pixel, height = pixel) %>%
+    image_background("#ffffff")
+  
+  for(i in 1:num){
+    add <- photos_gs[images[[i]]] %>% 
+      image_scale(width)
+    x <- (((i - 1 + cols) %% cols)) * width
+    y <- (ceiling(i / cols) - 1 ) * width
+    backing <- image_composite(backing, add, offset = glue("+{x}+{y}"))
+  }
+  backing
+}
+
+```
+
+
+```{js echo=FALSE}
+$(function() {
+var editor;
+$('.ace_editor').each(function( index ) {
+  editor = ace.edit(this);
+  editor.getSession().setUseWrapMode(true);
+  editor.setFontSize("16px");
+});
+})
+```
+
+# <img src='images/logo.png' width='50' /> Data science for everyone, including cats (and maybe dogs) {.tabset}
+
+## Check your photo-plot matches
+
+```{r check-plots, exercise=TRUE}
+grayscale_plot(photo_num = 4, 
+               num_pixels = 50)
+```
+
+## Light or dark?
+
+```{r sort-photos, exercise=TRUE, exercise.lines=20}
+photo_ref <- photo_links %>%
+  sample_n(10) %>%
+  rowwise() %>%
+  mutate(
+    gs_shade = case_when(
+      gs_pixels(photo_num, 500) %>% median() > 123 ~ "dark",
+      gs_pixels(photo_num, 500) %>% median() < 122 ~ "light"
+    )) 
+
+print("Light photos")
+photo_ref %>%
+  filter(gs_shade == "light") %>%
+  pull(photo_num) %>%
+  image_grid()
+
+print("Dark photos")
+photo_ref %>%
+  filter(gs_shade == "dark") %>%
+  pull(photo_num) %>%
+  image_grid()
+```
+
+## Create your base image letter
+
+Use the drawing tool below to draw the first letter of your first name as a capital letter. 
+
+<iframe id='drawing' src="https://script.google.com/a/aucklanduni.ac.nz/macros/s/AKfycbxLsrTYirZdR6O5kSIdSsah9FzirzCJLzPwQK0G/exec" frameborder="0" width="500" height="300" allowfullscreen="true" mozallowfullscreen="true" webkitallowfullscreen="true"></iframe>
+
+> Copy your link below BEFORE running the code
+
+```{r my-letter, exercise=TRUE, , exercise.lines=8}
+# replace the link below with your link
+my_link <- ""
+
+# this code shows your letter in only black or white
+# with no shades of gray
+image_read(my_link) %>%
+  image_scale("500") %>%
+  image_convert(type = "bilevel")
+```
+
+## Make a simple photo mosaic!
+
+```{r letter-mosaic, exercise=TRUE, exercise.timelimit = 180, exercise.diagnostics=FALSE, exercise.lines=13}
+# replace the link below with your link
+my_link <- ""
+
+# here are the rules to label each photo
+# they need your help!
+photo_ref <- photo_links %>%
+  rowwise() %>%
+  mutate(
+    gs_shade = case_when(
+      gs_pixels(photo_num, 500) %>% median() > 123 ~ "dark",
+      gs_pixels(photo_num, 500) %>% median() < 122 ~ "light"
+    )) 
+
+# the rest of the code makes the mosaic
+# don't worry about changing this part
+
+# read your letter drawing and convert
+# to black and white only
+my_letter <- image_read(my_link) %>%
+  image_convert(type = "bilevel")
+
+# get what the grayscale values are 
+# for each pixel in the letter image
+my_letter_pixels <- image_data(my_letter)[1,,] %>%
+  as.numeric()
+
+# go through each pixel in the letter image
+# and randomly sample a photo that matches
+# based on its shade
+mosaic_photos <- c(1:length(my_letter_pixels))
+for(i in 1:length(my_letter_pixels)){  
+  gs_origin <- my_letter_pixels[i]
+  target_photo <- photo_ref %>%
+    filter(gs_shade == ifelse(gs_origin==0,"dark","light")) %>%
+    sample_n(1) %>%
+    pull(photo_num)
+  mosaic_photos[i] <- target_photo
+}
+
+# make the mosaic!
+mosaic_photos %>%
+  image_grid()
+```

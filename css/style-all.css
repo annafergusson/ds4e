@@ -1,0 +1,82 @@
+@import url('https://fonts.googleapis.com/css?family=Open+Sans+Condensed:300');
+@import url('https://fonts.googleapis.com/css?family=Open+Sans:300');
+@import url('https://fonts.googleapis.com/css?family=Cabin+Sketch');
+
+body { 
+  font-family: 'Open Sans Condensed'; 
+}
+
+.topics-list{
+  background: #FBEB7D;
+  
+}
+.title {
+  display:none;
+}
+
+#header {
+  margin-bottom: 30px;
+}
+
+h1, h2, h3, h4, .navbar-nav  {
+  font-family: 'Open Sans Condensed';
+  font-weight: normal;
+  color: #7F7F7F;
+}
+
+h2 {
+  font-family: Cabin Sketch;
+  color: #666666;
+  font-weight: normal;
+}
+
+h2.tutorialTitle {
+  font-family: Cabin Sketch;
+  color: #000000;
+  font-weight: normal;
+  background-color: #FBEB7D;
+}
+
+
+
+
+
+
+a {
+  color: #7F7F7F;
+  text-decoration: none;
+  border-bottom: #FBEB7D solid 1px;
+  font-weight: bold;
+}
+
+a:hover {
+  color: #7F7F7F;
+  opacity: 0.5;
+  background-color: #FBEB7D;
+}
+
+a:visited {
+  color: #7F7F7F;
+  text-decoration: none;
+  border-bottom: #FBEB7D solid 1px;
+  font-weight: bold;
+}
+
+.topic {
+  background-color: #FBEB7D;
+}
+
+.topicsList .topic.current {
+  background-color: #D3d3d3;
+}
+
+.topics {
+  background-color: #FFFFFF;
+  padding-bottom: 100px;
+}
+
+blockquote {
+  border-left: 5px solid #FBEB7D;
+  font-size: large;
+  background-color: #d3d3d3;
+}
