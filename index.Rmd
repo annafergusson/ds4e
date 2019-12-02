@@ -29,7 +29,7 @@ tags$head(tags$link(rel = "shortcut icon", href = "https://annafergusson.com/log
 # data sources
 photo_data <- read_csv("www/dogsvscats1.csv")
 photo_links <- read_csv("www/dogsvscats2.csv")
-photos_mini <- list.files("images/minigs")
+photos_mini <- glue("{1:90}.png")
 photos_gs <- glue("images/minigs/{photos_mini}") %>%
   image_read()
 
